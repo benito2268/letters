@@ -31,6 +31,7 @@ gen: $(GRAMMAR)
 	$(ANTLR) -visitor $^
 
 $(MAINCLASS): gen
+	mkdir -p build/
 	javac -cp $(CLASSPATH) $(GENFILES) -d build/
 	javac -cp $(CLASSPATH) $(MAINFILE) -d build/
 	
