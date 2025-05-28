@@ -20,7 +20,7 @@ public class Letters {
 		
 		//FIXME the function you call here is the name of the
 		//grammar rule in Letters.g4 that you want to begin parsing at
-		ParseTree ast = parser.decl();
+		ParseTree ast = parser.program();
 		
 		//make antlr unparse the ast and print for debugging
 		System.out.println(ast.toStringTree(parser));

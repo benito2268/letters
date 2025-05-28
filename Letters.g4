@@ -1,41 +1,38 @@
-grammar Letters;
+grammar Letters ;
 
 //parser rules
-
-//accepts decls with or without an initial assignment
-program : (stmtList | declList)* EOF ;
+program : (stmtList | declList)* EOF ;              //accepts decls with or without an initial assignment
 
 declList : decl+ ;
-decl : ('B' | 'N') IDENT (SPACE INTLIT)? PERIOD		// bool or int
-	 | 'C' IDENT (SPACE CHARLIT)? PERIOD			// char
-	 | 'V' IDENT (SPACE vecLit)? PERIOD				// vector
-	 | 'L' IDENT PERIOD								// label
-	 ;
+decl : ('B' | 'N' | 'C' | 'V' | 'P')(term | assignExpr) PERIOD ;
 
 stmtList : stmt+ ;
-stmt : ifStmt PERIOD
-	 | assignStmt PERIOD
-	 | readStmt PERIOD
-	 | writeStmt PERIOD
-	 | jumpStmt PERIOD
+stmt : ifStmt
+	 | assignStmt
+	 | readStmt
+	 | writeStmt
+	 | jumpStmt
 	 ;
 
-ifStmt		: 'I' expr '{' stmtList+ 'F' ;
-assignStmt	: assignExpr;
-readStmt	: 'R' local ;
-writeStmt	: 'W' (INTLIT | CHARLIT | vecLit | local) ;
-jumpStmt	: 'J' IDENT ;
+ifStmt		: 'I' expr 'F' stmtList+ 'F' ;
+assignStmt	: assignExpr PERIOD ;
+readStmt	: 'R' local PERIOD ;
+writeStmt	: 'W' (INTLIT | CHARLIT | ESCAPE | vecLit | local) PERIOD ;
+jumpStmt	: 'J' IDENT PERIOD ;
 
-expr : assignExpr				// chaining (i.e. a=b=c) is not allowed
-	 | expr 'A' expr
-	 | expr 'S' expr
-	 | expr 'M' expr
-	 | expr 'D' expr
-	 | vecIndexExpr
-	 | term
-	 ;
+expr : addSubExpr ;
 
-assignExpr   : expr SPACE (INTLIT | CHARLIT | vecLit | local) ;
+addSubExpr : mulDivExpr (('A' | 'S') mulDivExpr)* ; 	// add, subtract
+mulDivExpr : equalsExpr (('M' | 'D') equalsExpr)* ;		// multiply, divide
+equalsExpr : compExpr   (('Q' | 'U') compExpr)*   ;		// equal, unequal
+compExpr   : atomExpr   (('G' | 'L') atomExpr)*   ; 	// greater than, less than
+
+atomExpr : assignExpr
+		 | vecIndexExpr
+		 | term
+		 ;
+
+assignExpr   : term 'E' (INTLIT | CHARLIT | ESCAPE | vecLit | local) ;
 vecIndexExpr : local (INTLIT | local) ;
 
 term : local
@@ -46,12 +43,15 @@ term : local
 
 local : IDENT ;
 
-vecLit : (INTLIT | CHARLIT | local)+ ;
+vecLit : (INTLIT | CHARLIT | ESCAPE | local)+ ;
 
 //lexer rules
 PERIOD  : '.' ; 
-SPACE   : [ ] ;					//used for assignments
-WS	    : [\t\r\n]+ -> skip ;	//skip other whitespace for now
+
+WS	    : [ \t\r\n]+ -> skip ;		//skip other whitespace for now
+COMMENT : '//'[~\r\n]+ -> skip ;	// allow '//' for comments
+
 IDENT   : ~[A-Z0-9 \t\r\n] ;		//accepts ONE of any unicode char that is not a cap. letter, whitespace, or digit
-INTLIT  : [0-9] ;				//matches a single char integer
+INTLIT  : [0-9] ;					//matches a single char integer
+ESCAPE  : 'X'[snt];					//escape chars
 CHARLIT : ~[ \t\r\n] ;
