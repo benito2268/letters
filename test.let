@@ -1,11 +1,12 @@
-N a E 5.				// a number 'a' equal to 5
-V m E helloXsworld!.	// a vector holding the string "hello world!"
+N a E 5.
+C b E 'a'.
+V m E "hello world!".
 
-P l.					// a 'place' (label) named 'l'
-I (a U 0) F				// if a is unequal to 0
-	W m.				// write the local 'm' to the screen
-	a E a S 1.			// a equals a subract 1
-	J l.				// jump to l
+P l.
+I (a U 0) F
+	W m.
+	a E a S 1.
+	J l.
 F
 
 

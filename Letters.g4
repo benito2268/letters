@@ -4,7 +4,7 @@ grammar Letters ;
 program : (stmtList | declList)* EOF ;              //accepts decls with or without an initial assignment
 
 declList : decl+ ;
-decl : ('B' | 'N' | 'C' | 'V' | 'P')(term | assignExpr) PERIOD ;
+decl : ('B' | 'N' | 'C' | 'V' | 'P') (IDENT | assignExpr) PERIOD ;
 
 stmtList : stmt+ ;
 stmt : ifStmt
@@ -32,26 +32,28 @@ atomExpr : assignExpr
 		 | term
 		 ;
 
-assignExpr   : term 'E' (INTLIT | CHARLIT | ESCAPE | vecLit | local) ;
+assignExpr   : term 'E' expr ;
 vecIndexExpr : local (INTLIT | local) ;
 
 term : local
 	 | INTLIT
 	 | CHARLIT
+	 | ESCAPE
 	 | vecLit
 	 ;
 
 local : IDENT ;
 
-vecLit : (INTLIT | CHARLIT | ESCAPE | local)+ ;
+vecLit : (INTLIT | CHARLIT | ESCAPE | local | STRLIT)+ ;
 
 //lexer rules
 PERIOD  : '.' ; 
 
 WS	    : [ \t\r\n]+ -> skip ;		//skip other whitespace for now
-COMMENT : '//'[~\r\n]+ -> skip ;	// allow '//' for comments
+COMMENT : '#'[~\r\n]+ -> skip ;		// allow '#' for comments
 
 IDENT   : ~[A-Z0-9 \t\r\n] ;		//accepts ONE of any unicode char that is not a cap. letter, whitespace, or digit
 INTLIT  : [0-9] ;					//matches a single char integer
 ESCAPE  : 'X'[snt];					//escape chars
-CHARLIT : ~[ \t\r\n] ;
+CHARLIT : '\''~[ \t\r\n]'\'' ;
+STRLIT  : '"'~[\n\r]*'"' ;			//only usable as a veclit of chars
